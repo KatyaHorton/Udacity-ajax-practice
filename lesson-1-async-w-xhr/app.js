@@ -18,9 +18,11 @@
        
 //We should create here our XHR object and send it to the server.
 //We need to get the API keys so we can make this request as unlash needs authentication
+	  
 //first get the Access Key from https://unplash.com 
 
-// constructs a new XHR object called unsplashRequest
+	  
+// constructs a new XHR object called -----------------------unsplashRequest
         const unsplashRequest = new XMLHttpRequest();
 
 //uses .open(method, url) method to initialize a newly-created request 
@@ -34,6 +36,8 @@
 //sets onload property to handle the successful responce of an XHR request
         unsplashRequest.onload = addImage;
 	  
+//sets onerror property to handle fail responce of an XHR request	  ??????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????? 
+	  
         unsplashRequest.onerror = function () {
             requestError(err, 'img');
 		
@@ -44,25 +48,104 @@
 
 // actually sends the request 
         unsplashRequest.send();
+	  
+		
+// constructs a new XHR object called ----------------------- timesRequest
+	
+	const timesRequest = new XMLHttpRequest();
+
+//initialises newly created request 
+	timesRequest.open('GET', `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}&api-key=1168fb99d193419fa58ca6fe8c9e4893`);
+	
+	timesRequest.onload = addArticle;
+	  
+// ????
+	timesRequest.onerror = function () {    
+        };
+	
+
+	timesRequest.send();  
+	  
+	  
   });
   
+	
 
+	
      function addImage() {
         let htmlContent = '';
         const data = JSON.parse(this.responseText);
-        const firstImage = data.results[0];
+		 console.log(data);
+		
+// if data and it's resuts are drfined 
+if (data && data.results && data.results[0]) {
+   
+	
+	const firstImage = data.results[0];
 
         htmlContent = `<figure> 
             <img src="${firstImage.urls.regular}" alt="${searchedForText}">
             <figcaptions>${searchedForText} by ${firstImage.user.name}</figcaptions>
         </figure>`;
+	
+/* returns a random image insted of the first one	
+	const randomImg = data.results[Math.floor(Math.random()*data.results.length)];
+
+        htmlContent = `<figure> 
+            <img src="${randomImg.urls.regular}" alt="${searchedForText}">
+            <figcaptions>${searchedForText} by ${randomImg.user.name}</figcaptions>
+        </figure>`; */
+	
+	} else 
+	
+// if data and it's resuts are NOT drfined 
+	{
+		htmlContent = `<div>No images avaliable.<br>Please change your request.</div>`
+	}
 
         responseContainer.insertAdjacentHTML('afterbegin', htmlContent);
 		 
-        // let unplashImg = document.querySelector('.unplash_image');
-        // unplashImg.setAttribute('src', firstImage.urls.regular);
 
-    }
+    };
+	
+	
+	function addArticle() {
+        let htmlContent = '';
+        const data = JSON.parse(this.responseText);
+	
+		
+// if data and it's resuts are drfined 
+if (data.response && data.response.docs && data.response.docs.length > 1) {
+   
+
+
+        htmlContent = '<ul>' + data.response.docs.map(article => `
+			<li class='article'>
+			<h2><a href="${article.web_url}">${article.headline.main}</a></h2>
+			<p>${article.snippet}</p>
+			</li>`).join('') + '</ul>'
+	
+/* returns a random image insted of the first one	
+	const randomImg = data.results[Math.floor(Math.random()*data.results.length)];
+
+        htmlContent = `<figure> 
+            <img src="${randomImg.urls.regular}" alt="${searchedForText}">
+            <figcaptions>${searchedForText} by ${randomImg.user.name}</figcaptions>
+        </figure>`; */
+	
+	} else 
+	
+// if data and it's resuts are NOT drfined 
+	{
+		htmlContent = `<div>No articles avaliable</div>`
+	}
+
+        responseContainer.insertAdjacentHTML('afterbegin', htmlContent);
+		 
+
+    };
+
+
  
  
 
