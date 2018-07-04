@@ -50,22 +50,18 @@
         unsplashRequest.send();
 	  
 		
-// constructs a new XHR object called ----------------------- timesRequest
-	
-	const timesRequest = new XMLHttpRequest();
+// constructs a new XHR object called ----------------------- timesRequest with jQuery
 
-//initialises newly created request 
-	timesRequest.open('GET', `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}&api-key=1168fb99d193419fa58ca6fe8c9e4893`);
-	
-	timesRequest.onload = addArticle;
 	  
-// ????
-	timesRequest.onerror = function () {    
-        };
+	 $.ajax({
 	
+url: `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}`,
+headers: {
+	Authorization: 'Client-ID 1168fb99d193419fa58ca6fe8c9e4893'}
+		 
+}).done(addArticles);
+		 
 
-	timesRequest.send();  
-	  
 	  
   });
   
@@ -109,39 +105,29 @@ if (data && data.results && data.results[0]) {
     };
 	
 	
-	function addArticle() {
-        let htmlContent = '';
-        const data = JSON.parse(this.responseText);
+
 	
-		
-// if data and it's resuts are drfined 
+function addArticles(data) {
+        let htmlContent = '';
+
 if (data.response && data.response.docs && data.response.docs.length > 1) {
    
+		const articles = data.response.docs;
 
-
-        htmlContent = '<ul>' + data.response.docs.map(article => `
+        htmlContent = '<ul>' + articles.map(article => `
 			<li class='article'>
 			<h2><a href="${article.web_url}">${article.headline.main}</a></h2>
 			<p>${article.snippet}</p>
-			</li>`).join('') + '</ul>'
-	
-/* returns a random image insted of the first one	
-	const randomImg = data.results[Math.floor(Math.random()*data.results.length)];
-
-        htmlContent = `<figure> 
-            <img src="${randomImg.urls.regular}" alt="${searchedForText}">
-            <figcaptions>${searchedForText} by ${randomImg.user.name}</figcaptions>
-        </figure>`; */
+			</li>`)
+			.join('') + '</ul>'
 	
 	} else 
 	
-// if data and it's resuts are NOT drfined 
 	{
 		htmlContent = `<div>No articles avaliable</div>`
 	}
 
         responseContainer.insertAdjacentHTML('afterbegin', htmlContent);
-		 
 
     };
 
