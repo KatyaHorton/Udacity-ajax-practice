@@ -4,7 +4,7 @@
     let searchedForText = 'Android';
     const responseContainer = document.querySelector('#response-container');
 
-// add event listener when submit button is clicked 
+// add event listener when submit button is clicked (cicks of two async requests)
   form.addEventListener('submit', function (e) {
 	
 //prevents defaul action 
@@ -35,8 +35,7 @@
 	  
 //sets onload property to handle the successful responce of an XHR request
         unsplashRequest.onload = addImage;
-	  
-//sets onerror property to handle fail responce of an XHR request	  ??????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????? 
+
 	  
         unsplashRequest.onerror = function () {
             requestError(err, 'img');
@@ -77,12 +76,14 @@ headers: {
 if (data && data.results && data.results[0]) {
    
 	
-	const firstImage = data.results[0];
+	
+// returns a random image insted of the first one	
+	const randomImg = data.results[Math.floor(Math.random()*data.results.length)];
 
         htmlContent = `<figure> 
-            <img src="${firstImage.urls.regular}" alt="${searchedForText}">
-            <figcaptions>${searchedForText} by ${firstImage.user.name}</figcaptions>
-        </figure>`;
+            <img src="${randomImg.urls.regular}" alt="${searchedForText}">
+            <figcaptions>${searchedForText} by ${randomImg.user.name}</figcaptions>
+        </figure>`; 
 	
 /* returns a random image insted of the first one	
 	const randomImg = data.results[Math.floor(Math.random()*data.results.length)];
@@ -118,13 +119,15 @@ if (data.response && data.response.docs && data.response.docs.length > 1) {
 			<li class='article'>
 			<h2><a href="${article.web_url}">${article.headline.main}</a></h2>
 			<p>${article.snippet}</p>
+
 			</li>`)
 			.join('') + '</ul>'
+
 	
 	} else 
 	
 	{
-		htmlContent = `<div>No articles avaliable</div>`
+		htmlContent = `<div>No articles avaliable.</div>`
 	}
 
         responseContainer.insertAdjacentHTML('afterbegin', htmlContent);
