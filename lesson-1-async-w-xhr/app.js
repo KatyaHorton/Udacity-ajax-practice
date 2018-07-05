@@ -4,105 +4,59 @@
     let searchedForText = 'Android';
     const responseContainer = document.querySelector('#response-container');
 
-// add event listener when submit button is clicked (cicks of two async requests)
-  form.addEventListener('submit', function (e) {
-	
-//prevents defaul action 
+  		form.addEventListener('submit', function (e) {
         e.preventDefault();
-	
-// sets response container to an empty string 
         responseContainer.innerHTML = '';
-	  
-//sets the value of the searchForText equal to what was typed in the searchField 
         searchedForText = searchField.value;
-       
-//We should create here our XHR object and send it to the server.
-//We need to get the API keys so we can make this request as unlash needs authentication
-	  
-//first get the Access Key from https://unplash.com 
 
-	  
-// constructs a new XHR object called -----------------------unsplashRequest
-        const unsplashRequest = new XMLHttpRequest();
-
-//uses .open(method, url) method to initialize a newly-created request 
-//uses GET request to retrieve data
-	    unsplashRequest.open('GET', 
-
-//url includes searchForText variable, and will change depending on the user's request 							 
-		`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`);
-	  
-	  
-//sets onload property to handle the successful responce of an XHR request
-        unsplashRequest.onload = addImage;
-
-	  
-        unsplashRequest.onerror = function () {
-            requestError(err, 'img');
-		
-        };
-// !!! setRequestheader must be called after .open and before .send
-        unsplashRequest.setRequestHeader('Authorization', 
-'Client-ID 0d0ecd17dfff39987d850edd198ce9aaa36b8c1ef027978b658796d7d93c79e0');
-
-// actually sends the request 
-        unsplashRequest.send();
-	  
-		
-// constructs a new XHR object called ----------------------- timesRequest with jQuery
+  
+	  $.ajax({
+		  url:`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`,
+	
+//headers cgreated separately (not within URL, like in NYTimes)
+		  headers: {
+			  Authorization: 'Client-ID 0d0ecd17dfff39987d850edd198ce9aaa36b8c1ef027978b658796d7d93c79e0'
+		  }
+	  }).done(addImage)
+	  .fail(function(err){
+		  requestError(err, 'image');
+	  });
+	
 
 	  
 	 $.ajax({
 	
-url: `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}`,
-headers: {
-	Authorization: 'Client-ID 1168fb99d193419fa58ca6fe8c9e4893'}
-		 
-}).done(addArticles);
-		 
-
-	  
+url: `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}&api-key=1168fb99d193419fa58ca6fe8c9e4893`
+		
+// It is not clear why we use the API key for NYTIMES directly in URL, 
+// and for images we create headers (like shownd below). 
+		
+		 //headers: {
+			// Authorization: 'Client-ID 1168fb99d193419fa58ca6fe8c9e4893'}
+}).done(addArticles)
+  .fail(function(err){
+		 requestError(err, 'articles');
+	 });		 
   });
   
 	
 
 	
-     function addImage() {
+     function addImage(data) {
         let htmlContent = '';
-        const data = JSON.parse(this.responseText);
-		 console.log(data);
-		
-// if data and it's resuts are drfined 
-if (data && data.results && data.results[0]) {
+     
+		if (data && data.results && data.results.length > 1) {
    
-	
-	
-// returns a random image insted of the first one	
-	const randomImg = data.results[Math.floor(Math.random()*data.results.length)];
+		const firstImage = data.results[0];
 
         htmlContent = `<figure> 
-            <img src="${randomImg.urls.regular}" alt="${searchedForText}">
-            <figcaptions>${searchedForText} by ${randomImg.user.name}</figcaptions>
+            <img src="${firstImage.urls.regular}" alt="${searchedForText}">
+            <figcaptions>${searchedForText} by ${firstImage.user.name}</figcaptions>
         </figure>`; 
-	
-/* returns a random image insted of the first one	
-	const randomImg = data.results[Math.floor(Math.random()*data.results.length)];
-
-        htmlContent = `<figure> 
-            <img src="${randomImg.urls.regular}" alt="${searchedForText}">
-            <figcaptions>${searchedForText} by ${randomImg.user.name}</figcaptions>
-        </figure>`; */
-	
-	} else 
-	
-// if data and it's resuts are NOT drfined 
-	{
+	} else {
 		htmlContent = `<div>No images avaliable.<br>Please change your request.</div>`
 	}
-
         responseContainer.insertAdjacentHTML('afterbegin', htmlContent);
-		 
-
     };
 	
 	
@@ -120,22 +74,19 @@ if (data.response && data.response.docs && data.response.docs.length > 1) {
 			<h2><a href="${article.web_url}">${article.headline.main}</a></h2>
 			<p>${article.snippet}</p>
 
-			</li>`)
-			.join('') + '</ul>'
-
-	
-	} else 
-	
-	{
+			</li>`
+		).join('') + '</ul>';
+	} else {
 		htmlContent = `<div>No articles avaliable.</div>`
 	}
-
-        responseContainer.insertAdjacentHTML('afterbegin', htmlContent);
+        responseContainer.insertAdjacentHTML('beforeend', htmlContent);
 
     };
 
+	
+	function requestError(e, part) {
+		
+	}
 
- 
- 
 
 })();
